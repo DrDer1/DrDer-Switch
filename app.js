@@ -120,7 +120,7 @@ class GameApp {
         // إضافة تلميحات للمراحل الأولى
         if (levelNumber >= 1 && levelNumber <= 3) {
             this.showTutorialHint(levelNumber);
-            this.calculateSolution(levelNumber);
+            this.loadSolution();
         }
         
         // إخفاء زر المرحلة التالية
@@ -177,61 +177,21 @@ class GameApp {
         this.boardElement.parentNode.insertBefore(this.tutorialHint, this.boardElement);
     }
 
-    calculateSolution(levelNumber) {
-        // حساب حل المرحلة عن طريق عكس الحركات
-        this.solutionMoves = [];
+    loadSolution() {
+        // الحصول على الحل الصحيح من gameLogic
+        this.solutionMoves = this.gameLogic.getSolution();
         this.currentSolutionIndex = 0;
         
-        // إنشاء نسخة من اللوحة الحالية
-        const tempBoard = this.gameLogic.board.map(row => [...row]);
-        const tempLogic = new GameLogic();
-        tempLogic.size = this.gameLogic.size;
-        tempLogic.board = tempBoard;
-        
-        // إيجاد الحل عن طريق تجربة كل الخلايا
-        const solution = this.findSolution(tempLogic);
-        
-        if (solution) {
-            this.solutionMoves = solution;
+        if (this.solutionMoves.length > 0) {
             this.highlightNextSolutionCell();
         }
-    }
-
-    findSolution(gameLogic) {
-        const size = gameLogic.size;
-        const moves = [];
-        const maxAttempts = 1000;
-        
-        // تجربة حل بسيط: اضغط على كل الخلايا المطفأة
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            let found = false;
-            
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    if (!gameLogic.board[i][j]) {
-                        moves.push([i, j]);
-                        gameLogic.toggleCell(i, j);
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) break;
-            }
-            
-            if (gameLogic.checkComplete()) {
-                return moves;
-            }
-            
-            if (!found) break;
-        }
-        
-        return null;
     }
 
     highlightNextSolutionCell() {
         // إزالة التمييز السابق
         if (this.highlightedCell) {
             this.highlightedCell.classList.remove('solution-highlight');
+            this.highlightedCell = null;
         }
         
         if (this.currentSolutionIndex < this.solutionMoves.length) {
@@ -285,10 +245,9 @@ class GameApp {
             return;
         }
         
-        // إخفاء التلميح عند أول نقرة
-        if (this.tutorialHint && this.currentLevel <= 3) {
-            // التحقق إذا كانت النقرة صحيحة
-            if (this.solutionMoves.length > 0 && this.currentSolutionIndex < this.solutionMoves.length) {
+        // التحقق إذا كانت النقرة صحيحة (للمراحل 1-3)
+        if (this.currentLevel <= 3 && this.solutionMoves.length > 0) {
+            if (this.currentSolutionIndex < this.solutionMoves.length) {
                 const [correctRow, correctCol] = this.solutionMoves[this.currentSolutionIndex];
                 
                 if (row === correctRow && col === correctCol) {
@@ -303,11 +262,16 @@ class GameApp {
                 }
             }
             
-            // إخفاء التلميح تدريجيًا
-            this.tutorialHint.style.opacity = '0';
-            setTimeout(() => {
-                this.removeTutorialHint();
-            }, 300);
+            // إخفاء التلميح عند أول نقرة
+            if (this.tutorialHint) {
+                this.tutorialHint.style.opacity = '0';
+                setTimeout(() => {
+                    if (this.tutorialHint) {
+                        this.tutorialHint.remove();
+                        this.tutorialHint = null;
+                    }
+                }, 300);
+            }
         }
         
         // الحصول على الخلايا المتأثرة
