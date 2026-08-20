@@ -17,6 +17,9 @@ class GameApp {
         this.overlayNextBtn = document.getElementById('overlay-next-btn');
         this.overlayHomeBtn = document.getElementById('overlay-home-btn');
         this.tutorialHint = null;
+        this.highlightedCell = null;
+        this.solutionMoves = [];
+        this.currentSolutionIndex = 0;
         
         this.currentLevel = 1;
         this.savedLevel = 1;
@@ -103,10 +106,7 @@ class GameApp {
 
     loadLevel(levelNumber) {
         // إزالة التلميح السابق إن وجد
-        if (this.tutorialHint) {
-            this.tutorialHint.remove();
-            this.tutorialHint = null;
-        }
+        this.removeTutorialHint();
         
         // توليد المرحلة
         this.gameLogic.generateLevel(levelNumber);
@@ -117,9 +117,10 @@ class GameApp {
         // إنشاء لوحة اللعب
         this.createBoard();
         
-        // إضافة تلميح للمرحلة الأولى
-        if (levelNumber === 1) {
-            this.showTutorialHint();
+        // إضافة تلميحات للمراحل الأولى
+        if (levelNumber >= 1 && levelNumber <= 3) {
+            this.showTutorialHint(levelNumber);
+            this.calculateSolution(levelNumber);
         }
         
         // إخفاء زر المرحلة التالية
@@ -129,18 +130,117 @@ class GameApp {
         this.gameLogic.saveProgress(levelNumber);
     }
 
-    showTutorialHint() {
+    removeTutorialHint() {
+        if (this.tutorialHint) {
+            this.tutorialHint.remove();
+            this.tutorialHint = null;
+        }
+        this.highlightedCell = null;
+        this.solutionMoves = [];
+        this.currentSolutionIndex = 0;
+    }
+
+    showTutorialHint(levelNumber) {
         this.tutorialHint = document.createElement('div');
         this.tutorialHint.className = 'tutorial-hint';
-        this.tutorialHint.innerHTML = `
-            <strong>🎯 كيف تلعب؟</strong>
-            اضغط على أي مربع لتغيير لونه ولون المربعات المجاورة له (فوق، تحت، يمين، يسار)
-            <br>
-            الهدف: اجعل جميع المربعات زرقاء!
-        `;
+        
+        let hintText = '';
+        if (levelNumber === 1) {
+            hintText = `
+                <strong>🎯 المرحلة 1 - تعلم الأساسيات</strong>
+                اضغط على المربع <span class="highlight-text">الأخضر الوامض</span> لتغيير لونه والمربعات المجاورة
+                <br>
+                الهدف: اجعل جميع المربعات زرقاء!
+            `;
+        } else if (levelNumber === 2) {
+            hintText = `
+                <strong>🎯 المرحلة 2 - خطوتين للحل</strong>
+                اتبع الترتيب: اضغط أولاً على المربع <span class="highlight-text">الأخضر الوامض</span>
+                <br>
+                ثم اضغط على المربع الذي سيظهر بعده!
+            `;
+        } else if (levelNumber === 3) {
+            hintText = `
+                <strong>🎯 المرحلة 3 - ثلاث خطوات</strong>
+                اتبع الترتيب: اضغط على المربعات <span class="highlight-text">الخضراء الوامضة</span> بالترتيب
+                <br>
+                كل خطوة ستظهر لك المربع التالي!
+            `;
+        }
+        
+        this.tutorialHint.innerHTML = hintText;
         
         // إدراج التلميح قبل لوحة اللعب
         this.boardElement.parentNode.insertBefore(this.tutorialHint, this.boardElement);
+    }
+
+    calculateSolution(levelNumber) {
+        // حساب حل المرحلة عن طريق عكس الحركات
+        this.solutionMoves = [];
+        this.currentSolutionIndex = 0;
+        
+        // إنشاء نسخة من اللوحة الحالية
+        const tempBoard = this.gameLogic.board.map(row => [...row]);
+        const tempLogic = new GameLogic();
+        tempLogic.size = this.gameLogic.size;
+        tempLogic.board = tempBoard;
+        
+        // إيجاد الحل عن طريق تجربة كل الخلايا
+        const solution = this.findSolution(tempLogic);
+        
+        if (solution) {
+            this.solutionMoves = solution;
+            this.highlightNextSolutionCell();
+        }
+    }
+
+    findSolution(gameLogic) {
+        const size = gameLogic.size;
+        const moves = [];
+        const maxAttempts = 1000;
+        
+        // تجربة حل بسيط: اضغط على كل الخلايا المطفأة
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            let found = false;
+            
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    if (!gameLogic.board[i][j]) {
+                        moves.push([i, j]);
+                        gameLogic.toggleCell(i, j);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+            
+            if (gameLogic.checkComplete()) {
+                return moves;
+            }
+            
+            if (!found) break;
+        }
+        
+        return null;
+    }
+
+    highlightNextSolutionCell() {
+        // إزالة التمييز السابق
+        if (this.highlightedCell) {
+            this.highlightedCell.classList.remove('solution-highlight');
+        }
+        
+        if (this.currentSolutionIndex < this.solutionMoves.length) {
+            const [row, col] = this.solutionMoves[this.currentSolutionIndex];
+            const cellIndex = row * this.gameLogic.size + col;
+            const cells = this.boardElement.querySelectorAll('.cell');
+            
+            if (cells[cellIndex]) {
+                this.highlightedCell = cells[cellIndex];
+                this.highlightedCell.classList.add('solution-highlight');
+            }
+        }
     }
 
     createBoard() {
@@ -183,13 +283,27 @@ class GameApp {
         }
         
         // إخفاء التلميح عند أول نقرة
-        if (this.tutorialHint && this.currentLevel === 1) {
+        if (this.tutorialHint && this.currentLevel <= 3) {
+            // التحقق إذا كانت النقرة صحيحة
+            if (this.solutionMoves.length > 0 && this.currentSolutionIndex < this.solutionMoves.length) {
+                const [correctRow, correctCol] = this.solutionMoves[this.currentSolutionIndex];
+                
+                if (row === correctRow && col === correctCol) {
+                    // نقرة صحيحة
+                    this.currentSolutionIndex++;
+                    
+                    // إزالة التمييز
+                    if (this.highlightedCell) {
+                        this.highlightedCell.classList.remove('solution-highlight');
+                        this.highlightedCell = null;
+                    }
+                }
+            }
+            
+            // إخفاء التلميح تدريجيًا
             this.tutorialHint.style.opacity = '0';
             setTimeout(() => {
-                if (this.tutorialHint) {
-                    this.tutorialHint.remove();
-                    this.tutorialHint = null;
-                }
+                this.removeTutorialHint();
             }, 300);
         }
         
@@ -206,6 +320,13 @@ class GameApp {
         
         // إضافة تأثيرات بصرية
         this.applyCellAnimations(affectedCells);
+        
+        // إذا كانت المرحلة من 1-3، أظهر الخطوة التالية
+        if (this.currentLevel <= 3 && this.solutionMoves.length > 0) {
+            setTimeout(() => {
+                this.highlightNextSolutionCell();
+            }, 500);
+        }
         
         // التحقق من اكتمال المرحلة
         if (this.gameLogic.checkComplete()) {
@@ -263,6 +384,9 @@ class GameApp {
         this.savedLevel = this.currentLevel + 1;
         this.continueBtn.classList.remove('hidden');
         this.continueLevelElement.textContent = this.savedLevel;
+        
+        // إزالة أي تلميحات متبقية
+        this.removeTutorialHint();
     }
 
     startNextLevel() {
@@ -278,6 +402,7 @@ class GameApp {
 
     goToHome() {
         this.winOverlay.classList.add('hidden');
+        this.removeTutorialHint();
         this.showScreen(this.homeScreen);
         
         // تحديث زر المتابعة
