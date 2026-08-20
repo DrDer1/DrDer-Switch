@@ -135,7 +135,10 @@ class GameApp {
             this.tutorialHint.remove();
             this.tutorialHint = null;
         }
-        this.highlightedCell = null;
+        if (this.highlightedCell) {
+            this.highlightedCell.classList.remove('solution-highlight');
+            this.highlightedCell = null;
+        }
         this.solutionMoves = [];
         this.currentSolutionIndex = 0;
     }
