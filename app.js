@@ -16,6 +16,7 @@ class GameApp {
         this.nextBtn = document.getElementById('next-btn');
         this.overlayNextBtn = document.getElementById('overlay-next-btn');
         this.overlayHomeBtn = document.getElementById('overlay-home-btn');
+        this.tutorialHint = null;
         
         this.currentLevel = 1;
         this.savedLevel = 1;
@@ -101,6 +102,12 @@ class GameApp {
     }
 
     loadLevel(levelNumber) {
+        // إزالة التلميح السابق إن وجد
+        if (this.tutorialHint) {
+            this.tutorialHint.remove();
+            this.tutorialHint = null;
+        }
+        
         // توليد المرحلة
         this.gameLogic.generateLevel(levelNumber);
         
@@ -110,11 +117,30 @@ class GameApp {
         // إنشاء لوحة اللعب
         this.createBoard();
         
+        // إضافة تلميح للمرحلة الأولى
+        if (levelNumber === 1) {
+            this.showTutorialHint();
+        }
+        
         // إخفاء زر المرحلة التالية
         this.nextBtn.classList.add('hidden');
         
         // حفظ التقدم
         this.gameLogic.saveProgress(levelNumber);
+    }
+
+    showTutorialHint() {
+        this.tutorialHint = document.createElement('div');
+        this.tutorialHint.className = 'tutorial-hint';
+        this.tutorialHint.innerHTML = `
+            <strong>🎯 كيف تلعب؟</strong>
+            اضغط على أي مربع لتغيير لونه ولون المربعات المجاورة له (فوق، تحت، يمين، يسار)
+            <br>
+            الهدف: اجعل جميع المربعات زرقاء!
+        `;
+        
+        // إدراج التلميح قبل لوحة اللعب
+        this.boardElement.parentNode.insertBefore(this.tutorialHint, this.boardElement);
     }
 
     createBoard() {
@@ -154,6 +180,17 @@ class GameApp {
     handleCellClick(row, col) {
         if (this.gameLogic.isComplete) {
             return;
+        }
+        
+        // إخفاء التلميح عند أول نقرة
+        if (this.tutorialHint && this.currentLevel === 1) {
+            this.tutorialHint.style.opacity = '0';
+            setTimeout(() => {
+                if (this.tutorialHint) {
+                    this.tutorialHint.remove();
+                    this.tutorialHint = null;
+                }
+            }, 300);
         }
         
         // الحصول على الخلايا المتأثرة
