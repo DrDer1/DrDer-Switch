@@ -20,7 +20,7 @@ class GameLogic {
         // تحديد حجم اللوحة بناءً على المرحلة
         this.size = this.getBoardSize(levelNumber);
         
-        // إنشاء لوحة فارغة (كلها OFF)
+        // إنشاء لوحة فارغة
         this.board = this.createEmptyBoard();
         
         // توليد المرحلة باستخدام seed
@@ -54,7 +54,6 @@ class GameLogic {
 
     // توليد seed من رقم المرحلة
     generateSeed(levelNumber) {
-        // استخدام خوارزمية بسيطة لتحويل رقم المرحلة إلى seed
         let seed = levelNumber * 2654435761;
         seed = seed ^ (seed >>> 16);
         seed = seed * 2246822519;
@@ -89,7 +88,6 @@ class GameLogic {
         }
         
         // تطبيق حركات عكسية على اللوحة (من الحالة المحلولة إلى الحالة الابتدائية)
-        // هذه الحركات هي الحل الصحيح بترتيب عكسي
         const reverseMoves = [];
         
         for (let i = 0; i < numMoves; i++) {
@@ -104,7 +102,6 @@ class GameLogic {
         }
         
         // الحل الصحيح هو عكس ترتيب الحركات
-        // (لأننا بدأنا من الحل ووصلنا للحالة الابتدائية)
         this.solutionMoves = reverseMoves.reverse();
     }
 
