@@ -1,6 +1,6 @@
 // ===== DrDer-Switch - Service Worker =====
 
-const CACHE_NAME = 'drder-switch-v2';
+const CACHE_NAME = 'drder-switch-v3';
 const CACHE_ASSETS = [
     './',
     './index.html',
