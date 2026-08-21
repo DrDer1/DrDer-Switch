@@ -131,9 +131,9 @@ body {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     border: 2px solid var(--border-color);
-    padding: 12px 24px;
-    font-size: 1rem;
-    min-width: 140px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 120px;
 }
 
 .action-btn:hover {
@@ -143,10 +143,11 @@ body {
 
 /* ===== شاشة اللعب ===== */
 #game-screen {
-    justify-content: flex-start;
+    justify-content: center;
     padding: 0;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 .game-header {
@@ -172,11 +173,12 @@ body {
 .game-info {
     display: flex;
     gap: 15px;
-    margin-top: 60px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 1rem;
     color: var(--text-secondary);
     justify-content: center;
+    position: relative;
+    z-index: 5;
 }
 
 .level-info, .moves-info {
@@ -193,48 +195,52 @@ body {
 .tutorial-hint {
     background-color: rgba(74, 158, 255, 0.1);
     border: 1px solid var(--accent);
-    border-radius: 12px;
-    padding: 10px;
+    border-radius: 10px;
+    padding: 8px;
     margin-bottom: 10px;
     text-align: center;
     color: var(--accent);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     max-width: 90vw;
     animation: fadeIn 0.5s ease-in-out;
     z-index: 5;
+    flex-shrink: 0;
 }
 
 .tutorial-hint strong {
     font-weight: 700;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
-/* ===== لوحة اللعب ===== */
+/* ===== لوحة اللعب - مربعة وتملأ العرض ===== */
 .game-board {
     display: grid;
-    gap: 8px;
+    gap: 6px;
     background-color: var(--bg-board);
-    padding: 15px;
-    border-radius: 16px;
+    padding: 12px;
+    border-radius: 14px;
     border: 2px solid var(--border-color);
-    width: calc(100vw - 40px);
-    height: calc(100vh - 180px);
+    width: calc(100vw - 30px);
+    height: calc(100vw - 30px);
+    max-width: 500px;
+    max-height: 500px;
     margin: 0 auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     align-content: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 /* ===== الخلايا ===== */
 .cell {
     width: 100%;
     height: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all var(--transition-speed) ease;
     background-color: var(--cell-off);
-    border: 3px solid var(--border-color);
+    border: 2px solid var(--border-color);
     position: relative;
     overflow: hidden;
     justify-self: stretch;
@@ -244,7 +250,7 @@ body {
 .cell.on {
     background-color: var(--cell-on);
     border-color: var(--cell-on);
-    box-shadow: 0 0 20px var(--cell-on-glow);
+    box-shadow: 0 0 15px var(--cell-on-glow);
 }
 
 .cell:active {
@@ -277,7 +283,7 @@ body {
 .solution-highlight {
     animation: solutionPulse 1s infinite;
     border-color: #4ade80 !important;
-    box-shadow: 0 0 25px rgba(74, 222, 128, 0.8) !important;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.8) !important;
     position: relative;
     z-index: 5;
 }
@@ -288,7 +294,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem;
+    font-size: 1.8rem;
     pointer-events: none;
     animation: tapIcon 1s infinite;
 }
@@ -300,7 +306,7 @@ body {
     }
     50% {
         transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(74, 222, 128, 1);
+        box-shadow: 0 0 25px rgba(74, 222, 128, 1);
     }
 }
 
@@ -332,18 +338,13 @@ body {
 
 /* ===== أزرار التحكم (أسفل الشاشة) ===== */
 .game-actions {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
-    padding: 10px;
+    margin-top: 15px;
     display: flex;
     gap: 12px;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 5;
+    flex-shrink: 0;
 }
 
 .action-btn {
@@ -411,31 +412,6 @@ body {
 }
 
 /* ===== التجاوب مع الشاشات الصغيرة ===== */
-@media (max-width: 768px) {
-    .game-title {
-        font-size: 2.8rem;
-    }
-    
-    .game-board {
-        width: calc(100vw - 30px);
-        height: calc(100vh - 170px);
-        gap: 6px;
-        padding: 12px;
-    }
-    
-    .game-info {
-        margin-top: 55px;
-        margin-bottom: 8px;
-        gap: 10px;
-    }
-    
-    .level-info, .moves-info {
-        padding: 5px 12px;
-        min-width: 80px;
-        font-size: 0.85rem;
-    }
-}
-
 @media (max-width: 480px) {
     .game-title {
         font-size: 2.5rem;
@@ -443,9 +419,9 @@ body {
     
     .game-board {
         width: calc(100vw - 20px);
-        height: calc(100vh - 160px);
-        gap: 5px;
+        height: calc(100vw - 20px);
         padding: 10px;
+        gap: 5px;
         border-radius: 12px;
     }
     
@@ -456,13 +432,12 @@ body {
     
     .game-info {
         font-size: 0.8rem;
-        margin-top: 50px;
-        margin-bottom: 6px;
-        gap: 8px;
+        margin-bottom: 10px;
+        gap: 10px;
     }
     
     .level-info, .moves-info {
-        padding: 4px 10px;
+        padding: 5px 10px;
         min-width: 70px;
         font-size: 0.8rem;
     }
@@ -470,7 +445,7 @@ body {
     .tutorial-hint {
         font-size: 0.75rem;
         padding: 6px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
     
     .action-btn {
@@ -487,20 +462,23 @@ body {
 @media (max-width: 360px) {
     .game-board {
         width: calc(100vw - 15px);
-        height: calc(100vh - 150px);
-        gap: 4px;
+        height: calc(100vw - 15px);
         padding: 8px;
+        gap: 4px;
+    }
+    
+    .game-actions {
+        margin-top: 10px;
+        gap: 8px;
     }
 }
 
-/* ===== دعم الشاشات الكبيرة جدًا ===== */
-@media (min-width: 1024px) {
+/* ===== دعم الشاشات الكبيرة ===== */
+@media (min-width: 768px) {
     .game-board {
-        width: calc(100vw - 60px);
-        height: calc(100vh - 200px);
-        max-width: 900px;
-        max-height: 800px;
-        gap: 10px;
-        padding: 20px;
+        width: min(600px, 70vh);
+        height: min(600px, 70vh);
+        gap: 8px;
+        padding: 15px;
     }
 }
