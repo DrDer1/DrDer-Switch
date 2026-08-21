@@ -189,24 +189,25 @@ body {
     font-size: 0.9rem;
 }
 
-/* ===== تلميح المرحلة الأولى ===== */
+/* ===== تلميح المراحل الأولى ===== */
 .tutorial-hint {
     background-color: rgba(74, 158, 255, 0.1);
     border: 1px solid var(--accent);
     border-radius: 12px;
-    padding: 8px;
-    margin-bottom: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
     text-align: center;
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     max-width: 90vw;
     animation: fadeIn 0.5s ease-in-out;
+    z-index: 5;
 }
 
 .tutorial-hint strong {
     font-weight: 700;
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
 }
 
 /* ===== لوحة اللعب ===== */
