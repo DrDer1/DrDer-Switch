@@ -7,6 +7,7 @@ class GameLogic {
         this.moves = 0;
         this.currentLevel = 1;
         this.isComplete = false;
+        this.solutionMoves = []; // تخزين الحل الصحيح
     }
 
     // ===== مولد المراحل =====
@@ -14,11 +15,12 @@ class GameLogic {
         this.currentLevel = levelNumber;
         this.moves = 0;
         this.isComplete = false;
+        this.solutionMoves = []; // إعادة تعيين الحل
         
         // تحديد حجم اللوحة بناءً على المرحلة
         this.size = this.getBoardSize(levelNumber);
         
-        // إنشاء لوحة فارغة
+        // إنشاء لوحة فارغة (كلها OFF)
         this.board = this.createEmptyBoard();
         
         // توليد المرحلة باستخدام seed
@@ -79,12 +81,31 @@ class GameLogic {
         // تحديد عدد الحركات العكسية بناءً على الصعوبة
         const numMoves = this.getNumMoves(levelNumber);
         
-        // تطبيق حركات عكسية على اللوحة
+        // أولاً: جعل جميع الخلايا ON (الحالة المحلولة)
+        for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                this.board[i][j] = true;
+            }
+        }
+        
+        // تطبيق حركات عكسية على اللوحة (من الحالة المحلولة إلى الحالة الابتدائية)
+        // هذه الحركات هي الحل الصحيح بترتيب عكسي
+        const reverseMoves = [];
+        
         for (let i = 0; i < numMoves; i++) {
             const row = Math.floor(random() * this.size);
             const col = Math.floor(random() * this.size);
+            
+            // تطبيق الحركة على اللوحة
             this.toggleCell(row, col);
+            
+            // تخزين الحركة
+            reverseMoves.push([row, col]);
         }
+        
+        // الحل الصحيح هو عكس ترتيب الحركات
+        // (لأننا بدأنا من الحل ووصلنا للحالة الابتدائية)
+        this.solutionMoves = reverseMoves.reverse();
     }
 
     // تحديد عدد الحركات حسب الصعوبة
@@ -157,6 +178,11 @@ class GameLogic {
         }
         
         return affected;
+    }
+
+    // الحصول على الحل الصحيح للمرحلة
+    getSolution() {
+        return this.solutionMoves;
     }
 
     // التحقق من وجود حفظ مسبق
