@@ -29,7 +29,6 @@ class GameApp {
     }
 
     initializeApp() {
-        // التحقق من وجود حفظ مسبق
         this.savedLevel = this.gameLogic.getSavedProgress();
         
         if (this.savedLevel > 1) {
@@ -37,42 +36,34 @@ class GameApp {
             this.continueLevelElement.textContent = this.savedLevel;
         }
         
-        // إظهار الشاشة الرئيسية
         this.showScreen(this.homeScreen);
     }
 
     setupEventListeners() {
-        // زر بدء اللعب
         this.startBtn.addEventListener('click', () => {
             this.startNewGame();
         });
 
-        // زر المتابعة
         this.continueBtn.addEventListener('click', () => {
             this.startFromLevel(this.savedLevel);
         });
 
-        // زر إعادة المرحلة
         this.resetBtn.addEventListener('click', () => {
             this.resetCurrentLevel();
         });
 
-        // زر المرحلة التالية (في شاشة اللعب)
         this.nextBtn.addEventListener('click', () => {
             this.startNextLevel();
         });
 
-        // زر المرحلة التالية (في overlay الفوز)
         this.overlayNextBtn.addEventListener('click', () => {
             this.startNextLevel();
         });
 
-        // زر الرئيسية (في overlay الفوز)
         this.overlayHomeBtn.addEventListener('click', () => {
             this.goToHome();
         });
 
-        // معالجة أحداث لوحة المفاتيح
         document.addEventListener('keydown', (e) => {
             if (e.key === 'r' || e.key === 'R') {
                 this.resetCurrentLevel();
@@ -81,12 +72,10 @@ class GameApp {
     }
 
     showScreen(screen) {
-        // إخفاء جميع الشاشات
         this.homeScreen.classList.remove('active');
         this.gameScreen.classList.remove('active');
         this.winOverlay.classList.add('hidden');
         
-        // إظهار الشاشة المطلوبة
         if (screen === this.homeScreen) {
             this.homeScreen.classList.add('active');
         } else if (screen === this.gameScreen) {
@@ -105,28 +94,19 @@ class GameApp {
     }
 
     loadLevel(levelNumber) {
-        // إزالة التلميح السابق إن وجد
         this.removeTutorialHint();
         
-        // توليد المرحلة
         this.gameLogic.generateLevel(levelNumber);
         
-        // تحديث الواجهة
         this.updateUI();
-        
-        // إنشاء لوحة اللعب
         this.createBoard();
         
-        // إضافة تلميحات للمراحل الأولى
         if (levelNumber >= 1 && levelNumber <= 3) {
             this.showTutorialHint(levelNumber);
             this.loadSolution();
         }
         
-        // إخفاء زر المرحلة التالية
         this.nextBtn.classList.add('hidden');
-        
-        // حفظ التقدم
         this.gameLogic.saveProgress(levelNumber);
     }
 
@@ -172,13 +152,10 @@ class GameApp {
         }
         
         this.tutorialHint.innerHTML = hintText;
-        
-        // إدراج التلميح قبل لوحة اللعب
         this.boardElement.parentNode.insertBefore(this.tutorialHint, this.boardElement);
     }
 
     loadSolution() {
-        // الحصول على الحل الصحيح من gameLogic
         this.solutionMoves = this.gameLogic.getSolution();
         this.currentSolutionIndex = 0;
         
@@ -188,7 +165,6 @@ class GameApp {
     }
 
     highlightNextSolutionCell() {
-        // إزالة التمييز السابق
         if (this.highlightedCell) {
             this.highlightedCell.classList.remove('solution-highlight');
             this.highlightedCell = null;
@@ -207,14 +183,12 @@ class GameApp {
     }
 
     createBoard() {
-        // مسح اللوحة السابقة
         this.boardElement.innerHTML = '';
         
-        // تحديد حجم الخلايا
         const boardSize = this.gameLogic.size;
         this.boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+        this.boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
         
-        // إنشاء الخلايا
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j++) {
                 const cell = document.createElement('div');
@@ -222,12 +196,10 @@ class GameApp {
                 cell.dataset.row = i;
                 cell.dataset.col = j;
                 
-                // إضافة معالج النقر
                 cell.addEventListener('click', () => {
                     this.handleCellClick(i, j);
                 });
                 
-                // إضافة معالج اللمس
                 cell.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     this.handleCellClick(i, j);
@@ -245,16 +217,13 @@ class GameApp {
             return;
         }
         
-        // التحقق إذا كانت النقرة صحيحة (للمراحل 1-3)
         if (this.currentLevel <= 3 && this.solutionMoves.length > 0) {
             if (this.currentSolutionIndex < this.solutionMoves.length) {
                 const [correctRow, correctCol] = this.solutionMoves[this.currentSolutionIndex];
                 
                 if (row === correctRow && col === correctCol) {
-                    // نقرة صحيحة
                     this.currentSolutionIndex++;
                     
-                    // إزالة التمييز
                     if (this.highlightedCell) {
                         this.highlightedCell.classList.remove('solution-highlight');
                         this.highlightedCell = null;
@@ -262,7 +231,6 @@ class GameApp {
                 }
             }
             
-            // إخفاء التلميح عند أول نقرة
             if (this.tutorialHint) {
                 this.tutorialHint.style.opacity = '0';
                 setTimeout(() => {
@@ -274,28 +242,21 @@ class GameApp {
             }
         }
         
-        // الحصول على الخلايا المتأثرة
         const affectedCells = this.gameLogic.getAffectedCells(row, col);
         
-        // تطبيق الحركة
         this.gameLogic.toggleCell(row, col);
         this.gameLogic.moves++;
         
-        // تحديث عرض اللوحة
         this.updateBoardDisplay();
         this.updateUI();
-        
-        // إضافة تأثيرات بصرية
         this.applyCellAnimations(affectedCells);
         
-        // إذا كانت المرحلة من 1-3، أظهر الخطوة التالية
         if (this.currentLevel <= 3 && this.solutionMoves.length > 0) {
             setTimeout(() => {
                 this.highlightNextSolutionCell();
             }, 500);
         }
         
-        // التحقق من اكتمال المرحلة
         if (this.gameLogic.checkComplete()) {
             this.handleLevelComplete();
         }
@@ -338,21 +299,14 @@ class GameApp {
     }
 
     handleLevelComplete() {
-        // عرض overlay الفوز
         this.winOverlay.classList.remove('hidden');
-        
-        // إظهار زر المرحلة التالية
         this.nextBtn.classList.remove('hidden');
-        
-        // حفظ التقدم
         this.gameLogic.saveProgress(this.currentLevel + 1);
         
-        // تحديث زر المتابعة في الشاشة الرئيسية
         this.savedLevel = this.currentLevel + 1;
         this.continueBtn.classList.remove('hidden');
         this.continueLevelElement.textContent = this.savedLevel;
         
-        // إزالة أي تلميحات متبقية
         this.removeTutorialHint();
     }
 
@@ -372,7 +326,6 @@ class GameApp {
         this.removeTutorialHint();
         this.showScreen(this.homeScreen);
         
-        // تحديث زر المتابعة
         this.savedLevel = this.gameLogic.getSavedProgress();
         if (this.savedLevel > 1) {
             this.continueBtn.classList.remove('hidden');
@@ -381,11 +334,9 @@ class GameApp {
     }
 }
 
-// تهيئة التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     const app = new GameApp();
     
-    // تسجيل Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
             .then(registration => {
